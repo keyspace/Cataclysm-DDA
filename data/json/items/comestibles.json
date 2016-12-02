@@ -10656,17 +10656,15 @@
         "comestible_type" : "FOOD",
         "symbol" : "%",
         "quench" : -3,
-        "healthy" : -1,
         "nutrition" : 17,
         "description" : "Flour is a commodity these days and to deal with that, most survivors resort to mix it with leftovers of other ingredients and bake it all into bread.  It's filling, and that's what matters.",
         "price" : 2000,
-        "material" : ["junk", "wheat"],
+        "material" : ["bone", "wheat"],
         "volume" : 1,
         "charges" : 10,
         "stack_size" : 20,
         "flags" : ["EATEN_HOT"],
-        "fun" : -1,
-        "vitamins": [ [ "calcium", 1 ] ]
+        "fun" : -1
     },
     {
         "type" : "COMESTIBLE",
