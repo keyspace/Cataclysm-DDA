@@ -11076,17 +11076,17 @@ void game::pldrive(int x, int y)
 
         ///\EFFECT_DRIVING reduces chance of losing control of vehicle when turning
         float skill = std::min( 10.0f, u.get_skill_level( skill_driving ) + ( u.get_dex() + u.get_per() ) / 10.0f );
-        float penalty = rng_float( 0.0f, handling_diff ) - skill;
+        float penalty = rng_float( 0.0f, handling_diff );
         int cost;
-        if( penalty > 0.0f ) {
+        if( penalty - skill > 0.0f ) {
             // At 10 penalty (rather hard to get), we're taking 4 turns per turn
-            cost = 100 * ( 1.0f + penalty / 2.5f );
+            cost = 100 * ( 1.0f + ( penalty - skill ) / 2.5f );
         } else {
             // At 10 skill, with a perfect vehicle, we could turn up to 3 times per turn
-            cost = std::max( u.get_speed(), 100 ) * ( 1.0f - ( -penalty / 10.0f ) * 2 / 3 );
+            cost = std::max( u.get_speed(), 100 ) * ( 1.0f - ( ( skill - penalty ) / 10.0f ) * 2 / 3 );
         }
 
-        if( penalty > skill || cost > 400 ) {
+        if( penalty - skill > skill || cost > 400 ) {
             add_msg( m_warning, _("You fumble with the %s's controls."), veh->name.c_str() );
             // Anything from a wasted attempt to 2 turns in the intended direction
             turn_delta *= rng( 0, 2 );
