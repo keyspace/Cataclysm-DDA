@@ -60,10 +60,11 @@ void mdeath::normal(monster *z)
         sfx::play_variant_sound( "mon_death", "zombie_death", sfx::get_heard_volume( z->pos() ) );
     }
 
-    if( g->u.sees( *z ) ) {
-        //Currently it is possible to get multiple messages that a monster died.
-        add_msg( m_good, _( "The %s dies!" ), z->name().c_str() );
-    }
+    // if( g->u.sees( *z ) ) {
+    //     //Currently it is possible to get multiple messages that a monster died.
+    //     add_msg( m_good, _( "The %s dies!" ), z->name().c_str() );
+    // }
+    add_msg( m_good, _( "The %s dies!" ), z->name().c_str() );
 
     const int max_hp = std::max( z->get_hp_max(), 1 );
     const float overflow_damage = std::max( -z->get_hp(), 0 );
