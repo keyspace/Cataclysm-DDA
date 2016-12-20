@@ -149,9 +149,9 @@ public:
             return;
         }
 
-        if (coalesce_messages(msg, type)) {
-            return;
-        }
+        // if (coalesce_messages(msg, type)) {
+        //     return;
+        // }
 
         while (messages.size() > 255) {
             messages.pop_front();
