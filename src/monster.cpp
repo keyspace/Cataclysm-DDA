@@ -1564,6 +1564,7 @@ void monster::die(Creature* nkiller)
     }
     dead = true;
     set_killer( nkiller );
+    g->increase_kill_count( type->id ); // DEBUG
     if (!no_extra_death_drops) {
         drop_items_on_death();
     }
@@ -1575,9 +1576,10 @@ void monster::die(Creature* nkiller)
             mdeath::guilt(this);
         }
         // TODO: add a kill counter to npcs?
-        if( ch->is_player() ) {
-            g->increase_kill_count( type->id );
-        }
+        // DEBUG
+        // if( ch->is_player() ) {
+        //     g->increase_kill_count( type->id );
+        // }
         if( type->difficulty >= 30 ) {
             ch->add_memorial_log( pgettext( "memorial_male", "Killed a %s." ),
                                   pgettext( "memorial_female", "Killed a %s." ),
