@@ -5636,7 +5636,7 @@ bool item::process_wet( player * /*carrier*/, const tripoint & /*pos*/ )
 
 bool item::process_tool( player *carrier, const tripoint &pos )
 {
-    if( type->tool->turns_per_charge > 0 && int( calendar::turn ) % type->tool->turns_per_charge == 0 ) {
+    if( type->tool->turns_per_charge > 0 && calendar::once_every( type->tool->turns_per_charge ) ) {
         auto qty = std::max( ammo_required(), 1L );
         qty -= ammo_consume( qty, pos );
 
