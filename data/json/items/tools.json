@@ -1327,7 +1327,7 @@
     "type": "TOOL",
     "name": "cell phone (off)",
     "name_plural": "cell phones (off)",
-    "description": "This is a typical smartphone that features an LED for use as a flash.  Using this cellphone will turn it on, assuming it is charged with batteries. It also has a flashlight app.",
+    "description": "FIXME This is a typical smartphone that features an LED for use as a flash.  Using this cellphone will turn it on, assuming it is charged with batteries. It also has a flashlight app.",
     "weight": 226,
     "volume": 1,
     "price": 10000,
