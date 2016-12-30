@@ -1340,8 +1340,11 @@
     "max_charges": 100,
     "charges_per_use": 1,
     "use_action": {
-      "type": "transform",
+      "type": "delayed_transform",
+      "transform_age": 5,
+      "not_ready_msg": "The cell phone is booting.",
       "msg": "You turn the cell phone on.",
+      "menu_text": "Turn on",
       "target": "cell_phone_on",
       "active": true,
       "need_charges": 1,
@@ -1354,13 +1357,14 @@
     "type": "TOOL",
     "name": "cell phone (on)",
     "name_plural": "cell phones (on)",
-    "turns_per_charge": 30000,
+    "//": "36 hours",
+    "turns_per_charge": 21600,
     "revert_to": "cell_phone",
     "use_action": [
       {
         "type": "delayed_transform",
         "transform_age": 5,
-        "not_ready_msg": "Seeing this is a bug.",
+        "not_ready_msg": "The cell phone is shutting down.",
         "msg": "You turn the cell phone off.",
         "menu_text": "Turn off",
         "target": "cell_phone",
@@ -1394,7 +1398,7 @@
       {
         "type": "delayed_transform",
         "transform_age": 5,
-        "not_ready_msg": "Seeing this is a bug.",
+        "not_ready_msg": "The cell phone is shutting down.",
         "msg": "You turn the cell phone off.",
         "menu_text": "Turn off",
         "target": "cell_phone",
