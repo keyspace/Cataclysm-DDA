@@ -4350,15 +4350,16 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
     } else if( ( bash_floor && g->m.is_bashable_ter_furn( p, true ) ) ||
                // Movecost 2 indicates flat terrain like a floor, no collision there.
                ( g->m.is_bashable_ter_furn( p, false ) && g->m.move_cost_ter_furn( p ) != 2 &&
-                 // Tiny things, like flowers, only collide with wheels (see below).
-                 !g->m.has_flag_ter_or_furn( "TINY", p ) &&
                  // These are bashable, but don't interact with vehicles - exclude them.
-                 !g->m.has_flag_ter_or_furn( "NOCOLLIDE", p ) ) ) {
+                 !g->m.has_flag_ter_or_furn( "NOCOLLIDE", p ) &&
+                 // Tiny things, like flowers, only collide with wheels (see below).
+                 !g->m.has_flag_ter_or_furn( "TINY", p ) ) ) {
         ret.type = veh_coll_bashable;
         terrain_collision_data( p, bash_floor, mass2, part_dens, e );
         ret.target_name = g->m.disp_name( p );
-    } else if( g->m.is_bashable_ter_furn( p, false ) && g->m.passable_ter_furn( p ) &&
-               !g->m.has_flag_ter_or_furn( "NOCOLLIDE", p ) ) {
+    } else if( g->m.is_bashable_ter_furn( p, false ) && !g->m.has_flag_ter_or_furn( "NOCOLLIDE", p ) &&
+               // Do not mask next else-if clause!
+               g->m.passable_ter_furn( p ) ) {
         // Check special parts that collide even on "flat terrain".
         // Don't have to check short: wheels need frames, those collide with everything (above).
         // TODO: it would be nice, though, if wheels collided with wreckage (is short) before frame.
