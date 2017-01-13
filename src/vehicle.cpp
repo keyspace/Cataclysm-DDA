@@ -4350,6 +4350,8 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
     } else if( ( bash_floor && g->m.is_bashable_ter_furn( p, true ) ) ||
                // Movecost 2 indicates flat terrain like a floor, no collision there.
                ( g->m.is_bashable_ter_furn( p, false ) && g->m.move_cost_ter_furn( p ) != 2 &&
+                 // Tiny things, like flowers, only collide with wheels (see below).
+                 !g->m.has_flag_ter_or_furn( "TINY", p ) &&
                  // These are bashable, but don't interact with vehicles - exclude them.
                  !g->m.has_flag_ter_or_furn( "NOCOLLIDE", p ) ) ) {
         ret.type = veh_coll_bashable;
@@ -4357,18 +4359,22 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
         ret.target_name = g->m.disp_name( p );
     } else if( g->m.is_bashable_ter_furn( p, false ) && g->m.passable_ter_furn( p ) ) {
         // Check special parts that collide even on "flat terrain".
-        // Tiny things, like flowers, collide with wheels. // TODO: check VPFLAG_TRACK
         // Don't have to check short here: wheels need frames, those collide with everything.
+        // TODO: it would be nice, though, if wheels collided with wreckage (is short) before frame.
+        // TODO: check VPFLAG_TRACK, too
         const int maybe_wheel_part = part_with_feature( ret.part, VPFLAG_WHEEL );
         if( maybe_wheel_part >= 0 && g->m.has_flag_ter_or_furn( "TINY", p ) ) {
-            // TODO
+            ret.part = maybe_wheel_part;
         }
         // Protrusions don't collide with tiny/short furniture, they do otherwise.
         const int maybe_protruding_part = part_with_feature( ret.part, "PROTRUSION" );
         if( maybe_protruding_part >= 0 && !( g->m.has_flag_ter_or_furn( "TINY", p ) ||
                                              g->m.has_flag_ter_or_furn( "SHORT", p ) ) ) {
-            // TODO
+            ret.part = maybe_protruding_part;
         }
+        ret.type = veh_coll_bashable;
+        terrain_collision_data( p, bash_floor, mass2, part_dens, e );
+        ret.target_name = g->m.disp_name( p );
     } else if( g->m.impassable_ter_furn( p ) ||
                ( bash_floor && !g->m.has_flag( TFLAG_NO_FLOOR, p ) ) ) {
         ret.type = veh_coll_other; // not destructible
