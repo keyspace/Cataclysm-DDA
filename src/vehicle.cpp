@@ -4359,7 +4359,7 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
         ret.target_name = g->m.disp_name( p );
     } else if( g->m.is_bashable_ter_furn( p, false ) && !g->m.has_flag_ter_or_furn( "NOCOLLIDE", p ) &&
                // Do not mask next else-if clause!
-               g->m.passable_ter_furn( p ) ) {
+               g->m.passable_ter_furn( p ) && !bash_floor ) {
         // Check special parts that collide even on "flat terrain".
         // Don't have to check short: wheels need frames, those collide with everything (above).
         // TODO: it would be nice, though, if wheels collided with wreckage (is short) before frame.
