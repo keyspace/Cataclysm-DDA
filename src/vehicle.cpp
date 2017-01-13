@@ -4355,7 +4355,7 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
         ret.type = veh_coll_bashable;
         terrain_collision_data( p, bash_floor, mass2, part_dens, e );
         ret.target_name = g->m.disp_name( p );
-    } else if( g->m.is_bashable_ter_furn( p, false ) ) {
+    } else if( g->m.is_bashable_ter_furn( p, false ) && g->m.passable_ter_furn( p ) ) {
         // Check special parts that collide even on "flat terrain".
         // Tiny things, like flowers, collide with wheels. // TODO: check VPFLAG_TRACK
         // Don't have to check short here: wheels need frames, those collide with everything.
