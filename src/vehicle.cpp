@@ -4339,39 +4339,49 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
         e = 0.30;
         part_dens = 15;
         switch( critter->get_size() ) {
-        case MS_TINY:    // Rodent
-            mass2 = 1;
-            break;
-        case MS_SMALL:   // Half human
-            mass2 = 41;
-            break;
+        case MS_TINY:   mass2 =    1; break; // Rodent
+        case MS_SMALL:  mass2 =   41; break; // Half human
         default:
-        case MS_MEDIUM:  // Human
-            mass2 = 82;
-            break;
-        case MS_LARGE:   // Cow
-            mass2 = 400;
-            break;
-        case MS_HUGE:     // TAAAANK
-            mass2 = 1000;
-            break;
+        case MS_MEDIUM: mass2 =   82; break; // Human
+        case MS_LARGE:  mass2 =  400; break; // Cow
+        case MS_HUGE:   mass2 = 1000; break; // TAAAANK
         }
         ret.target_name = critter->disp_name();
     } else if( ( bash_floor && g->m.is_bashable_ter_furn( p, true ) ) ||
+               // Movecost 2 indicates flat terrain like a floor, no collision there.
                ( g->m.is_bashable_ter_furn( p, false ) && g->m.move_cost_ter_furn( p ) != 2 &&
-                // Don't collide with tiny things, like flowers, unless we have a wheel in our space.
-                (part_with_feature(ret.part, VPFLAG_WHEEL) >= 0 ||
-                 !g->m.has_flag_ter_or_furn("TINY", p)) &&
-                // Protrusions don't collide with short terrain.
-                // Tiny also doesn't, but it's already excluded unless there's a wheel present.
-                !(part_with_feature(ret.part, "PROTRUSION") >= 0 &&
-                  g->m.has_flag_ter_or_furn("SHORT", p)) &&
-                // These are bashable, but don't interact with vehicles.
-                !g->m.has_flag_ter_or_furn("NOCOLLIDE", p) ) ) {
-        // Movecost 2 indicates flat terrain like a floor, no collision there.
+                 // These are bashable, but don't interact with vehicles - exclude them.
+                 !g->m.has_flag_ter_or_furn( "NOCOLLIDE", p ) &&
+                 // Tiny things, like flowers, only collide with wheels (see below).
+                 !g->m.has_flag_ter_or_furn( "TINY", p ) ) ) {
         ret.type = veh_coll_bashable;
         terrain_collision_data( p, bash_floor, mass2, part_dens, e );
         ret.target_name = g->m.disp_name( p );
+    } else if( g->m.is_bashable_ter_furn( p, false ) && !g->m.has_flag_ter_or_furn( "NOCOLLIDE", p ) &&
+               // Do not mask next else-if clause!
+               g->m.passable_ter_furn( p ) && !bash_floor ) {
+        // Check special parts that collide even on "flat terrain".
+        // Don't have to check short: wheels need frames, those collide with everything (above).
+        // TODO: it would be nice, though, if wheels collided with wreckage (is short) before frame.
+        // TODO: check VPFLAG_TRACK, too
+        int not_frame_part = -1;
+        const int maybe_wheel_part = part_with_feature( ret.part, VPFLAG_WHEEL );
+        if( maybe_wheel_part >= 0 && g->m.has_flag_ter_or_furn( "TINY", p ) ) {
+            not_frame_part = maybe_wheel_part;
+        }
+        // Protrusions don't collide with tiny/short furniture, they do otherwise.
+        const int maybe_protruding_part = part_with_feature( ret.part, "PROTRUSION" );
+        if( maybe_protruding_part >= 0 && !( g->m.has_flag_ter_or_furn( "TINY", p ) ||
+                                             g->m.has_flag_ter_or_furn( "SHORT", p ) ) ) {
+            not_frame_part = maybe_protruding_part;
+        }
+        // Got a non-frame collision.
+        if( not_frame_part != -1 ) {
+            ret.part = not_frame_part;
+            ret.type = veh_coll_bashable;
+            terrain_collision_data( p, bash_floor, mass2, part_dens, e );
+            ret.target_name = g->m.disp_name( p );
+        }
     } else if( g->m.impassable_ter_furn( p ) ||
                ( bash_floor && !g->m.has_flag( TFLAG_NO_FLOOR, p ) ) ) {
         ret.type = veh_coll_other; // not destructible
@@ -4430,7 +4440,8 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
     float vel2 = 0.0f;
     do {
         smashed = false;
-        // Impulse of vehicle
+        // Impulse and velocity delta calculations
+        // Scalar (non-vector), so divide by 100 and multiply by 99 at iteration end to guarantee exit.
         const float vel1 = coll_velocity / 100.0f;
         // Velocity of car after collision
         const float vel1_a = (mass*vel1 + mass2*vel2 + e*mass2*(vel2 - vel1)) / (mass + mass2);
@@ -4440,13 +4451,15 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
         const float E_before = 0.5f * (mass * vel1 * vel1)   + 0.5f * (mass2 * vel2 * vel2);
         const float E_after =  0.5f * (mass * vel1_a*vel1_a) + 0.5f * (mass2 * vel2_a*vel2_a);
         const float d_E = E_before - E_after;
+
         if( d_E <= 0 ) {
             // Deformation energy is signed
             // If it's negative, it means something went wrong
             // But it still does happen sometimes...
+            // @todo: debugmsg?..
             if( fabs(vel1_a) < fabs(vel1) ) {
                 // Lower vehicle's speed to prevent infinite loops
-                coll_velocity = vel1_a * 90;
+                coll_velocity = vel1_a * 80;
             }
             if( fabs(vel2_a) > fabs(vel2) ) {
                 vel2 = vel2_a;
@@ -4550,7 +4563,7 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
             }
         }
 
-        coll_velocity = vel1_a * ( smashed ? 100 : 90 );
+        coll_velocity = vel1_a * ( smashed ? 100 : 97 );
         // Stop processing when sign inverts, not when we reach 0
     } while( !smashed && sgn( coll_velocity ) == vel_sign );
 
