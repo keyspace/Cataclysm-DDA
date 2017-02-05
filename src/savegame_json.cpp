@@ -198,6 +198,7 @@ void SkillLevel::serialize(JsonOut &json) const
     json.start_object();
     json.member("level", level() );
     json.member("exercise", exercise(true) );
+    json.member("exercisepending", exercise_pending() );
     json.member("istraining", isTraining() );
     json.member("lastpracticed", int ( lastPracticed() ) );
     json.end_object();
@@ -209,6 +210,7 @@ void SkillLevel::deserialize(JsonIn &jsin)
     int lastpractice = 0;
     data.read( "level", _level );
     data.read( "exercise", _exercise );
+    data.read( "exercisepending", _exercise_pending );
     data.read( "istraining", _isTraining );
     data.read( "lastpracticed", lastpractice );
     if(lastpractice == 0) {

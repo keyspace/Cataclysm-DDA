@@ -73,11 +73,13 @@ class SkillLevel : public JsonSerializer, public JsonDeserializer
 {
         int _level;
         int _exercise;
+        int _exercise_pending;
         calendar _lastPracticed;
         bool _isTraining;
 
     public:
-        SkillLevel( int level = 0, int exercise = 0, bool isTraining = true, int lastPracticed = 0 );
+        SkillLevel( int level = 0, int exercise = 0, int exercise_pending = 0,
+                    bool isTraining = true, int lastPracticed = 0 );
         SkillLevel( int minLevel, int maxLevel, int minExercise, int maxExercise,
                     bool isTraining = true, int lastPracticed = 0 );
 
@@ -97,11 +99,19 @@ class SkillLevel : public JsonSerializer, public JsonDeserializer
             return plevel;
         }
 
+        /** accessor, used in player_display.cpp, player.cpp, and exercised_level() here */
+        /** @ref raw used when serialising to savefile */
         int exercise( bool raw = false ) const {
             return raw ? _exercise : _exercise / ( ( _level + 1 ) * ( _level + 1 ) );
         }
 
+        /** accessor, only used for savefile serialisation */
+        int exercise_pending() const {
+            return _exercise_pending;
+        }
+
         int exercised_level() const {
+            // FIXME: magicnum 100
             return level() * level() * 100 + exercise();
         }
 
@@ -109,9 +119,13 @@ class SkillLevel : public JsonSerializer, public JsonDeserializer
             return _lastPracticed;
         }
 
+        /** unconditionally increase _exercise_pending */
         void train( int amount, bool skip_scaling = false );
+        /** unconditionally add _exercise_pending to _exercise, zero out the former, and increase level if necessary */
+        void dwell();
         bool isRusting() const;
         bool rust( bool charged_bio_mem );
+        /** update _lastPracticed with current turn */
         void practice();
         bool can_train() const;
 

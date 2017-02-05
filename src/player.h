@@ -1072,8 +1072,12 @@ class player : public Character, public JsonSerializer, public JsonDeserializer
         /** Returns the penalty to speed from thirst */
         static int thirst_speed_penalty( int thirst );
 
+        /** helper for practice() */
         int adjust_for_focus(int amount) const;
+        /** increase a skill's pending exercise */
         void practice( const skill_id &s, int amount, int cap = 99 );
+        /** move pending exercise to real exercise */
+        void dwell(); // in player_experience.cpp
 
         /** Legacy activity assignment, should not be used where resuming is important. */
         void assign_activity( activity_id type, int moves = calendar::INDEFINITELY_LONG, int index = -1, int pos = INT_MIN,

@@ -137,8 +137,9 @@ bool Skill::is_contextual_skill() const
     return _tags.count( "contextual_skill" ) > 0;
 }
 
-SkillLevel::SkillLevel(int level, int exercise, bool isTraining, int lastPracticed)
-  : _level(level), _exercise(exercise), _lastPracticed(lastPracticed), _isTraining(isTraining)
+SkillLevel::SkillLevel(int level, int exercise, int exercise_pending, bool isTraining, int lastPracticed)
+    : _level(level), _exercise(exercise), _exercise_pending(exercise_pending),
+      _lastPracticed(lastPracticed), _isTraining(isTraining)
 {
     if (lastPracticed <= 0) {
         _lastPracticed = HOURS(get_world_option<int>( "INITIAL_TIME" ) );
@@ -147,7 +148,8 @@ SkillLevel::SkillLevel(int level, int exercise, bool isTraining, int lastPractic
 
 SkillLevel::SkillLevel(int minLevel, int maxLevel, int minExercise, int maxExercise,
                        bool isTraining, int lastPracticed)
-  : SkillLevel(rng(minLevel, maxLevel), rng(minExercise, maxExercise), isTraining, lastPracticed)
+    : SkillLevel(rng(minLevel, maxLevel), rng(minExercise, maxExercise), rng(minExercise, maxExercise),
+                 isTraining, lastPracticed)
 
 {
 }
@@ -155,14 +157,22 @@ SkillLevel::SkillLevel(int minLevel, int maxLevel, int minExercise, int maxExerc
 void SkillLevel::train(int amount, bool skip_scaling)
 {
     if( skip_scaling ) {
-        _exercise += amount;
+        _exercise_pending += amount;
     } else {
         const double scaling = get_option<float>( "SKILL_TRAINING_SPEED" );
         if( scaling > 0.0 ) {
-            _exercise += divide_roll_remainder( amount * scaling, 1.0 );
+            _exercise_pending += divide_roll_remainder( amount * scaling, 1.0 );
         }
     }
+}
 
+// FIXME: actually invoke this somewhere
+void SkillLevel::dwell()
+{
+    _exercise += _exercise_pending;
+    _exercise_pending = 0;
+
+    // FIXME: magicnum 100
     const int overflow = _exercise - 100 * (_level + 1) * (_level + 1);
     if( overflow >= 0 ) {
         _exercise = overflow;
@@ -201,10 +211,18 @@ bool SkillLevel::rust( bool charged_bio_mem )
         return one_in(5);
     }
 
-    _exercise -= _level;
-    auto const &rust_type = get_option<std::string>( "SKILL_RUST" );
+    // first draw from very recent exercise that hasn't been dwelled upon
+    _exercise_pending -= _level;
+    if( _exercise_pending < 0 ) {
+        _exercise += _exercise_pending; // add a negative, i.e. subtract
+        _exercise_pending = 0;
+    }
+
+    // then reduce further, based on rust game option
     if (_exercise < 0) {
+        auto const &rust_type = get_option<std::string>( "SKILL_RUST" );
         if (rust_type == "vanilla" || rust_type == "int") {
+            // FIXME: magicnum 100
             _exercise = (100 * _level * _level) - 1;
             --_level;
         } else {

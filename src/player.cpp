@@ -11673,6 +11673,8 @@ void player::practice( const skill_id &id, int amount, int cap )
         }
     }
 
+    // FIXME: SkillLevel::train() no longer changes skill level
+    // Basically, move this to player::dwell() in player_experience.cpp
     if (amount > 0 && level.isTraining()) {
         int oldLevel = get_skill_level( id );
         get_skill_level( id ).train(amount);
