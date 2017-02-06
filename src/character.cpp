@@ -986,6 +986,7 @@ SkillLevel& Character::get_skill_level( const skill_id &ident )
         return _skills[ident];
     }
 
+    debugmsg( "returning null_skill ident" );
     null_skill.level( 0 );
     return null_skill;
 }

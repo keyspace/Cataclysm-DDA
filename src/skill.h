@@ -99,13 +99,13 @@ class SkillLevel : public JsonSerializer, public JsonDeserializer
             return plevel;
         }
 
-        /** accessor, used in player_display.cpp, player.cpp, and exercised_level() here */
+        /** accessor, used in player_display.cpp, player.cpp, and exercised_level() here; also savefile serialisation */
         /** @ref raw used when serialising to savefile */
         int exercise( bool raw = false ) const {
             return raw ? _exercise : _exercise / ( ( _level + 1 ) * ( _level + 1 ) );
         }
 
-        /** accessor, only used for savefile serialisation */
+        /** accessor, used in player_exercise.cpp; also savefile serialisation */
         int exercise_pending() const {
             return _exercise_pending;
         }

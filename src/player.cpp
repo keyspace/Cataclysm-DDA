@@ -11673,21 +11673,8 @@ void player::practice( const skill_id &id, int amount, int cap )
         }
     }
 
-    // FIXME: SkillLevel::train() no longer changes skill level
-    // Basically, move this to player::dwell() in player_experience.cpp
     if (amount > 0 && level.isTraining()) {
-        int oldLevel = get_skill_level( id );
         get_skill_level( id ).train(amount);
-        int newLevel = get_skill_level( id );
-        if (is_player() && newLevel > oldLevel) {
-            add_msg(m_good, _("Your skill in %s has increased to %d!"), skill.name().c_str(), newLevel);
-            lua_callback("on_skill_increased");
-        }
-        if(is_player() && newLevel > cap) {
-            //inform player immediately that the current recipe can't be used to train further
-            add_msg(m_info, _("You feel that %s tasks of this level are becoming trivial."),
-                    skill.name().c_str());
-        }
 
         int chance_to_drop = focus_pool;
         focus_pool -= chance_to_drop / 100;

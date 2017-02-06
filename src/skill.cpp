@@ -166,13 +166,14 @@ void SkillLevel::train(int amount, bool skip_scaling)
     }
 }
 
-// FIXME: actually invoke this somewhere
+// TODO: take parameter limiting amount?
 void SkillLevel::dwell()
 {
     _exercise += _exercise_pending;
     _exercise_pending = 0;
 
     // FIXME: magicnum 100
+    // FIXME: funky formula
     const int overflow = _exercise - 100 * (_level + 1) * (_level + 1);
     if( overflow >= 0 ) {
         _exercise = overflow;
