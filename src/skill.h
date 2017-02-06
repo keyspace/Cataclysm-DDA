@@ -120,6 +120,7 @@ class SkillLevel : public JsonSerializer, public JsonDeserializer
         }
 
         /** unconditionally increase _exercise_pending */
+        // TODO: skip_scaling not used anywhere, remove?
         void train( int amount, bool skip_scaling = false );
         /** unconditionally add _exercise_pending to _exercise, zero out the former, and increase level if necessary */
         void dwell( int amount );

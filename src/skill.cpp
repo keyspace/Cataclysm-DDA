@@ -157,7 +157,7 @@ SkillLevel::SkillLevel(int minLevel, int maxLevel, int minExercise, int maxExerc
 void SkillLevel::train(int amount, bool skip_scaling)
 {
     if( skip_scaling ) {
-        _exercise_pending += amount;
+        _exercise_pending = std::max( _exercise_pending, amount );
     } else {
         const double scaling = get_option<float>( "SKILL_TRAINING_SPEED" );
         if( scaling > 0.0 ) {
