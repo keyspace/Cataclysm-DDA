@@ -1569,6 +1569,10 @@ bool game::do_turn()
         u.update_morale();
     }
 
+    if( calendar::once_every( MINUTES( 10 ) ) ) {
+        u.dwell();
+    }
+
     if( calendar::once_every( SECONDS( 90 ) ) ) {
         u.check_and_recover_morale();
     }
