@@ -166,18 +166,19 @@ void SkillLevel::train(int amount, bool skip_scaling)
     }
 }
 
-// TODO: take parameter limiting amount?
-void SkillLevel::dwell()
+void SkillLevel::dwell( int amount )
 {
-    _exercise += _exercise_pending;
-    _exercise_pending = 0;
+    const int amt = std::min( _exercise_pending, amount );
+    _exercise_pending -= amt;
+    _exercise += amt;
 
     // FIXME: magicnum 100
     // FIXME: funky formula
     const int overflow = _exercise - 100 * (_level + 1) * (_level + 1);
     if( overflow >= 0 ) {
-        _exercise = overflow;
         ++_level;
+        _exercise_pending = 0;
+        _exercise = overflow / ( (_level + 1) * (_level + 1) );
     }
 }
 

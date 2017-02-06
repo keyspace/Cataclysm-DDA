@@ -26,9 +26,10 @@ void player::dwell() {
         return;
     }
 
-    // choose what to dwell upon out of the top four
-    const int index = ( int ) std::abs( rng_normal( -3.0f, 3.0f ) );
+    // @magicnum 3.0f - choose what to dwell upon out of the top three
+    const int index = std::floor( std::abs( rng_normal( -3.0f, 3.0f ) ) );
     const skill_id id = candwellon.at( index )->ident();
+
     if( get_skill_level( id ).exercise_pending() == 0 ) {
         return;
     }
@@ -38,7 +39,8 @@ void player::dwell() {
 
     // TODO: too many invocations of the same, can do better
     int oldLevel = get_skill_level( id );
-    get_skill_level( id ).dwell();
+    ///\EFFECT_INT speeds up internalising experience from both practice and book reading
+    get_skill_level( id ).dwell( get_int() * 4 );
     int newLevel = get_skill_level( id );
     if ( is_player() && newLevel > oldLevel ) {
         add_msg_if_player( m_good, _( "Your skill in %s has increased to %d!" ),

@@ -122,7 +122,7 @@ class SkillLevel : public JsonSerializer, public JsonDeserializer
         /** unconditionally increase _exercise_pending */
         void train( int amount, bool skip_scaling = false );
         /** unconditionally add _exercise_pending to _exercise, zero out the former, and increase level if necessary */
-        void dwell();
+        void dwell( int amount );
         bool isRusting() const;
         bool rust( bool charged_bio_mem );
         /** update _lastPracticed with current turn */
