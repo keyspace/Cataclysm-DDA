@@ -815,9 +815,10 @@ void uimenu::query(bool loop)
         keypress = event.get_first_input();
         const auto iter = keymap.find( keypress );
 
-        // If there's a callback registered, pass event to it before processing.
+        // If there's a callback registered, pass event to it before processing ourselves.
         // If the callback handles the event completely, `true` will be returned.
         if ( callback != nullptr ) {
+            // special "?" handling for martial arts menu
             if( iter == keymap.end() && action == "ANY_INPUT" && event.get_first_input() != '?' ) {
                 skipkey = callback->key( event, UIMENU_INVALID, this );
             } else {
