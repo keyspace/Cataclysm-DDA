@@ -818,8 +818,8 @@ void uimenu::query(bool loop)
         // If there's a callback registered, pass event to it before processing ourselves.
         // If the callback handles the event completely, `true` will be returned.
         if ( callback != nullptr ) {
-            // special "?" handling for martial arts menu
-            if( iter == keymap.end() && action == "ANY_INPUT" && event.get_first_input() != '?' ) {
+            // "?" is a special case: martial arts menu uses selection index to look up specific style
+            if( iter == keymap.end() && action == "ANY_INPUT" && keypress != '?' ) {
                 skipkey = callback->key( event, UIMENU_INVALID, this );
             } else {
                 skipkey = callback->key( event, selected, this );
@@ -850,7 +850,7 @@ void uimenu::query(bool loop)
         } else if ( action == "QUIT" && return_invalid) { //break loop with ESCAPE key
             break;
         } else {
-            if ( ! skipkey && return_invalid ) {
+            if ( return_invalid ) {
                 ret = -1;
             }
         }
