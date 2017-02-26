@@ -50,19 +50,22 @@ class actmenu_cb : public uimenu_callback
         }
         ~actmenu_cb() override { }
 
-        bool key( const input_event &event, int idx, uimenu * /*menu*/ ) override {
+        bool key( const input_event &event, int menuentry, uimenu * /*menu*/ ) override {
             const std::string action = ctxt.input_to_action( event );
             if( action == "HELP_KEYBINDINGS" ) {
                 ctxt.display_help();
                 return true;
             }
-            // Don't write a message if unknown command was sent
-            // Only when an inexistent tool was selected
-            auto itemless_action = am.find( action );
-            if( itemless_action != am.end() && idx == -1 ) {
+
+            // Action is invalid in calling menu, is valid for this callback,
+            // but no item selected - display message and tell
+            // menu the input event has been handled...
+            if( menuentry == UIMENU_INVALID && am.find( action ) != am.end() ) {
                 popup( _( "You do not have an item that can perform this action." ) );
                 return true;
             }
+            // ...Otherwise, if key can't be mapped to an action, or a selection
+            // has been made, tell menu to keep on handling input.
             return false;
         }
 };
