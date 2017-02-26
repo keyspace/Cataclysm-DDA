@@ -815,11 +815,16 @@ void uimenu::query(bool loop)
 
         keypress = event.get_first_input();
         const auto mapped = keymap.find( keypress );
+        if( mapped != keymap.end() ) {
+            debugmsg( "setting selected to mapped %i", mapped->second );
+            selected = mapped->second;
+        }
 
         // If there's a callback registered, pass event to it before processing ourselves.
         // If the callback handles the event completely, `true` will be returned.
         bool handled = false;
         if ( callback != nullptr ) {
+            debugmsg( "handing control to callback" );
             int sel = selected;
             // HACK: If key is not mapped in this context, notify callback
             // by way of not providing selection index.
@@ -843,29 +848,27 @@ void uimenu::query(bool loop)
             continue;
         }
 
-        if( action == "ANY_INPUT" && event.type == CATA_INPUT_KEYBOARD ) {
-            if( mapped != keymap.end() ) {
-                selected = mapped->second;
-            }
+        if( ( action == "ANY_INPUT" && event.type == CATA_INPUT_KEYBOARD ) ||
+            ( ( action == "CONFIRM" && !fentries.empty() ) ) ) {
             if( entries[ selected ].enabled ) {
                 ret = entries[ selected ].retval; // valid
+                debugmsg( "set ret to selected's retval %i", ret );
             } else if ( return_invalid ) {
                 ret = 0 - entries[ selected ].retval; // disabled
-            }
-        } else if ( action == "CONFIRM" && !fentries.empty() ) {
-            if( entries[ selected ].enabled ) {
-                ret = entries[ selected ].retval; // valid
-            } else if ( return_invalid ) {
-                ret = 0 - entries[ selected ].retval; // disabled
+                debugmsg( "set ret to %i due to return_invalid", ret );
             }
         } else if ( action == "QUIT" && return_invalid) { //break loop with ESCAPE key
+            debugmsg( "action QUIT and return_invalid, breaking loop!" );
             break;
         } else {
             if ( return_invalid ) {
+                debugmsg( "reached fallback and return_invalid, set ret to %i", ret );
                 ret = -1;
             }
         }
+        debugmsg( "ret in-loop: %i", ret );
     } while ( loop && (ret == startret ) );
+    debugmsg( "ret after loop: %i", ret );
 }
 
 /*
