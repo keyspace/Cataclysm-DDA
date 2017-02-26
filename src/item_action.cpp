@@ -57,16 +57,20 @@ class actmenu_cb : public uimenu_callback
                 return true;
             }
 
-            // Action is invalid in calling menu, is valid for this callback,
-            // but no item selected - display message and tell
-            // menu the input event has been handled...
-            if( menuentry == UIMENU_INVALID && am.find( action ) != am.end() ) {
-                popup( _( "You do not have an item that can perform this action." ) );
+            if( menuentry != UIMENU_INVALID ) {
+                // Mostly handling invalid input ATM - tell the calling menu to go on.
+                return false;
+            } else {
+                // Action is invalid in calling menu (keypress not in keymap), ...
+                if ( am.find( action ) != am.end() ) {
+                    // ... but its name is valid in general (has been registered).
+                    popup( _( "You do not have an item that can perform this action." ) );
+                } else {
+                    // ... and it's name is invalid in general. Do nothing.
+                }
+                // Tell the menu we've handled the event.
                 return true;
             }
-            // ...Otherwise, if key can't be mapped to an action, or a selection
-            // has been made, tell menu to keep on handling input.
-            return false;
         }
 };
 
