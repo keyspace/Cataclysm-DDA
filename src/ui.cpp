@@ -807,8 +807,8 @@ void uimenu::query(bool loop)
     ctxt.register_action( "ANY_INPUT" );
     hotkeys = ctxt.get_available_single_char_hotkeys( hotkeys );
 
-    show();
     do {
+        show();
         bool skipkey = false;
         const auto action = ctxt.handle_input();
         const auto event = ctxt.get_raw_input();
@@ -854,8 +854,6 @@ void uimenu::query(bool loop)
                 ret = -1;
             }
         }
-
-        show();
     } while ( loop && (ret == startret ) );
 }
 
