@@ -809,39 +809,50 @@ void uimenu::query(bool loop)
 
     do {
         show();
-        bool skipkey = false;
+
         const auto action = ctxt.handle_input();
         const auto event = ctxt.get_raw_input();
+
         keypress = event.get_first_input();
-        const auto iter = keymap.find( keypress );
+        const auto mapped = keymap.find( keypress );
 
         // If there's a callback registered, pass event to it before processing ourselves.
         // If the callback handles the event completely, `true` will be returned.
+        bool handled = false;
         if ( callback != nullptr ) {
-            // "?" is a special case: martial arts menu uses selection index to look up specific style
-            if( iter == keymap.end() && action == "ANY_INPUT" && keypress != '?' ) {
-                skipkey = callback->key( event, UIMENU_INVALID, this );
-            } else {
-                skipkey = callback->key( event, selected, this );
+            int sel = selected;
+            // HACK: If key is not mapped in this context, notify callback
+            // by way of not providing selection index.
+            // "?" a special case: martial arts menu's callback relies
+            // on index to look up specific style.
+            if( mapped == keymap.end() && action == "ANY_INPUT" && keypress != '?' ) {
+                sel = UIMENU_INVALID;
             }
+            handled = callback->key( event, sel, this );
+        }
+        if ( handled ) {
+            continue;
         }
 
-        if ( skipkey ) {
-            /* nothing */
-        } else if ( scrollby( scroll_amount_from_action( action ) ) == true ) {
-            /* nothing */
-        } else if ( filtering && action == "FILTER" ) {
+        if ( scrollby( scroll_amount_from_action( action ) ) == true ) {
+            continue;
+        }
+
+        if ( filtering && action == "FILTER" ) {
             inputfilter();
-        } else if( action == "ANY_INPUT" && event.type == CATA_INPUT_KEYBOARD ) {
-            if( iter != keymap.end() ) {
-                selected = iter->second;
+            continue;
+        }
+
+        if( action == "ANY_INPUT" && event.type == CATA_INPUT_KEYBOARD ) {
+            if( mapped != keymap.end() ) {
+                selected = mapped->second;
             }
             if( entries[ selected ].enabled ) {
                 ret = entries[ selected ].retval; // valid
             } else if ( return_invalid ) {
                 ret = 0 - entries[ selected ].retval; // disabled
             }
-        } else if ( !fentries.empty() && action == "CONFIRM" ) {
+        } else if ( action == "CONFIRM" && !fentries.empty() ) {
             if( entries[ selected ].enabled ) {
                 ret = entries[ selected ].retval; // valid
             } else if ( return_invalid ) {
