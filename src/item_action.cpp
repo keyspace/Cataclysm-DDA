@@ -66,9 +66,9 @@ class actmenu_cb : public uimenu_callback
                     // ... but its name is valid in general (has been registered).
                     popup( _( "You do not have an item that can perform this action." ) );
                 } else {
-                    // ... and it's name is invalid in general. Do nothing.
+                    // ... or its name is invalid in general. Do nothing.
                 }
-                // Tell the menu we've handled the event.
+                // In either case, tell the menu we've handled the event.
                 return true;
             }
         }
