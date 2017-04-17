@@ -9,8 +9,13 @@ from fnmatch import fnmatch
 import json
 import re
 import os
-from StringIO import StringIO
 import sys
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
 
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -50,7 +55,7 @@ def match_primitive_values(item_value, where_value):
     """Perform any odd logic on item matching.
     """
     # Matching interpolation for keyboard constrained input.
-    if type(item_value) == str or type(item_value) == unicode:
+    if type(item_value) == str: #or type(item_value) == unicode: # python 2/3 incompatibility
         # Direct match, and don't convert unicode in Python 2.
         return bool(re.match(where_value, item_value))
     elif type(item_value) == int or type(item_value) == float:
@@ -261,9 +266,11 @@ class CDDAJSONWriter(object):
         self.write_key(k)
         self.buf.write("[\n")
         lol = lol[:]
+        lol = list(lol) # python 2/3 compatibility
         while lol:
             self.indent_multiplier += 1
             inner = lol.pop(0)[:]
+            inner = list(inner) # python 2/3 compatibility
             self.indented_write("[\n")
             while inner:
                 self.indent_multiplier += 1
@@ -291,6 +298,7 @@ class CDDAJSONWriter(object):
 
         self.buf = StringIO()
         items = self.d.items()
+        items = list(items) # python 2/3 compatibility
         global indent_multiplier
         self.indented_write("{\n")
         self.indent_multiplier += 1
